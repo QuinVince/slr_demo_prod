@@ -8,7 +8,7 @@ import json
 import logging
 import os
 from dotenv import load_dotenv
-from prisma_generator import generate_prisma_diagram
+from .prisma_generator import generate_prisma_diagram
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,8 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the static directory
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class QueryRequest(BaseModel):
     query: str
@@ -60,7 +58,7 @@ async def generate_questions(request: Request):
         if not os.getenv("MISTRAL_API_KEY"):
             raise HTTPException(status_code=500, detail="MISTRAL_API_KEY environment variable not set")
         
-        result = subprocess.run(['python', 'generate_questions.py', query], capture_output=True, text=True)
+        result = subprocess.run(['python', 'backend/generate_questions.py', query], capture_output=True, text=True)
         logger.info(f"generate_questions.py output: {result.stdout}")
         if result.stderr:
             logger.error(f"generate_questions.py error: {result.stderr}")
@@ -78,7 +76,7 @@ async def generate_questions(request: Request):
 @app.post("/generate_pubmed_query")
 async def generate_pubmed_query(request: PubMedQueryRequest):
     try:
-        result = subprocess.run(['python', 'generate_pubmed_query.py', request.query, json.dumps(request.answers)], capture_output=True, text=True)
+        result = subprocess.run(['python', 'backend/generate_pubmed_query.py', request.query, json.dumps(request.answers)], capture_output=True, text=True)
         return {"query": result.stdout.strip()}
     except Exception as e:
         logger.error(f"Error in generate_pubmed_query: {str(e)}")
@@ -143,7 +141,12 @@ for route in app.routes:
     else:
         logger.debug(f"Mount: {route.path}")
 
+    # Mount the static directory
+frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'server', 'build')
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+logger.debug(f"Serving static files from {frontend_dir}")
+
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
     import uvicorn
-    logger.info("Starting FastAPI server")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=port)

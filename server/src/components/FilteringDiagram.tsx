@@ -81,8 +81,8 @@ const FilteringDiagram: React.FC<FilteringDiagramProps> = ({ initialData }) => {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      console.log('Sending request to http://localhost:8000/export_prisma');
-      const response = await axios.get('http://localhost:8000/export_prisma', { responseType: 'blob' });
+      console.log('Sending request to /export_prisma');
+      const response = await axios.get('/export_prisma', { responseType: 'blob' });
       console.log('Received response:', response);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
