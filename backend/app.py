@@ -28,8 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the static directory
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class QueryRequest(BaseModel):
     query: str
@@ -101,7 +99,7 @@ async def generate_pubmed_query(request: PubMedQueryRequest):
 async def generate_synonyms(request: SynonymRequest):
     logger.info(f"Received synonym request: {request}")
     try:
-        script_path = os.path.join(os.path.dirname(__file__), 'backend/generate_synonyms.py')
+        script_path = os.path.join(os.path.dirname(__file__), 'generate_synonyms.py')
         logger.info(f"Looking for script at: {script_path}")
         if not os.path.exists(script_path):
             logger.error(f"Script not found at {script_path}")
@@ -156,7 +154,13 @@ for route in app.routes:
     else:
         logger.debug(f"Mount: {route.path}")
 
+# Mount the static directory
+frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'server', 'build')
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+logger.debug(f"Serving static files from {frontend_dir}")
+
+
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
     import uvicorn
-    logger.info("Starting FastAPI server")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=port)

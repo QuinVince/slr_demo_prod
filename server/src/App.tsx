@@ -4,7 +4,7 @@ import QueryGenerator from './components/QueryGenerator';
 import DocumentAnalysis from './components/DocumentAnalysis';
 import FilteringDiagram from './components/FilteringDiagram';
 import DuplicateAnalysis from './components/DuplicateAnalysis';
-import logo from './images/Image1.png';
+import logo from './utils/Image1.png';
 
 // Add these type definitions
 export interface SavedQuery {
@@ -95,7 +95,7 @@ const App: React.FC = () => {
             <FaHeartbeat className="text-white text-3xl mr-4" />
             <h1 className="text-2xl font-semibold text-white">Systematic Literature Review Assistant</h1>
             </div>
-            <img src={logo} alt="Logo" className="h-12 w-auto" /> {/* Add this line */}
+            <img src={logo} alt="Logo" className="h-12 w-auto" />
             </div>
       </header>
       <main className="container mx-auto px-4 py-8">
