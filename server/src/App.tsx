@@ -97,7 +97,7 @@ const App: React.FC = () => {
           </div>
           <img src={logo} alt="Logo" className="h-12 w-auto" /> {/* Add this line */}
         </div>
-      </header>
+      </header>  
       <main className="container mx-auto px-4 py-8">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="border-b border-gray-200">
