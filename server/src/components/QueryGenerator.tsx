@@ -241,7 +241,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
               placeholder="Describe your research question..."
             />
             <p className="mt-2 text-sm text-gray-600 italic">
-              Example: Publications on the use of ocrelizumab in the treatment of multiple sclerosis
+              Example: Publications addressing the use of ocrelizumab in combination therapy for the treatment of multiple sclerosis
             </p>
             <button
               onClick={handleNextStep}
