@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { SavedQuery, AnalysisData } from '../App'; // Import SavedQuery from App.tsx
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend} from 'chart.js';
 import { mockDocuments } from '../mockData';
+import { generateAnalysisData } from '../utils/generateAnalysisData';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -56,7 +57,7 @@ const StyledThumb = styled.div`
   outline: none;
   top: 10%;
   transform: translate(0, -50%);
-  
+
   &:focus {
     box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.3);
   }
@@ -134,9 +135,9 @@ const DocumentAnalysis: React.FC<DocumentAnalysisProps> = ({ analysisData, updat
   const handleQuerySelect = (query: SavedQuery) => {
     console.log('Query selected:', query);
     setSelectedQuery(query);
-    
-    
-    
+
+
+
     console.log('Updated analysis data:', { selectedQuery: query, documents: mockDocuments });
     updateAnalysisData({ selectedQuery: query, documents: mockDocuments });
   };
@@ -287,20 +288,13 @@ const DocumentAnalysis: React.FC<DocumentAnalysisProps> = ({ analysisData, updat
   const calculateAnalysisResults = useCallback(() => {
     if (!analysisData.selectedQuery) return null;
 
-    const totalPapers = analysisData.selectedQuery.paperCount;
-    const deduplicatedPapers = Math.floor(totalPapers * 0.9); // Assume 10% are duplicates
-
-    // Use a deterministic method to generate a percentage between 5% and 30%
-    const seed = parseInt(analysisData.selectedQuery.id, 10);
-    const percentage = (((seed * 1234567) % 2500) / 10000) + 0.05; // Results in 0.05 to 0.30
-    const hundredPercentMatch = Math.floor(deduplicatedPapers * percentage);
-    const reductionPercentage = Math.round((1 - (hundredPercentMatch / deduplicatedPapers)) * 100);
+    const generatedData = generateAnalysisData(analysisData.selectedQuery);
 
     return {
-      totalPapers,
-      deduplicatedPapers,
-      hundredPercentMatch,
-      reductionPercentage
+      totalPapers: generatedData.totalVolume,
+      deduplicatedPapers: generatedData.postDeduplication,
+      hundredPercentMatch: generatedData.hundredPercentMatch,
+      reductionPercentage: Math.round((1 - (generatedData.hundredPercentMatch / generatedData.postDeduplication)) * 100)
     };
   }, [analysisData.selectedQuery]);
 
@@ -548,7 +542,7 @@ const DocumentAnalysis: React.FC<DocumentAnalysisProps> = ({ analysisData, updat
                         {doc.title}
                       </h4>
                     </div>
-                    
+
                     <div className="text-sm mb-2">
                       <p>
                         {doc.abstractExpanded 
@@ -564,7 +558,7 @@ const DocumentAnalysis: React.FC<DocumentAnalysisProps> = ({ analysisData, updat
                         </button>
                       )}
                     </div>
-                    
+
                     {doc.pico.expanded && (
                       <div className="mt-2 bg-gray-100 p-3 rounded">
                         <h5 className="font-semibold mb-2">PICO Information</h5>
@@ -576,7 +570,7 @@ const DocumentAnalysis: React.FC<DocumentAnalysisProps> = ({ analysisData, updat
                         </ul>
                       </div>
                     )}
-                    
+
                     <div className="flex items-center mt-2 text-xs text-gray-500">
                       <YearTag date={doc.date} />
                       <StudyTypeTag type={doc.studyType} />

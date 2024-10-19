@@ -45,6 +45,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
   const [synonymGroups, setSynonymGroups] = useState<SynonymGroup[]>([]);
   const [isSynonymsLoading, setIsSynonymsLoading] = useState(false);
   const [selectedConceptIndex, setSelectedConceptIndex] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (initialData) {
@@ -110,6 +111,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
         setStep(step + 1);
       } catch (error) {
         console.error('Error generating questions:', error);
+        alert('An error occurred while generating questions. Please try again later.');
       }
     } else if (step === 3) {
       try {
@@ -121,6 +123,11 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
         setStep(step + 1);
       } catch (error) {
         console.error('Error generating PubMed query:', error);
+        if (axios.isAxiosError(error) && error.response) {
+          alert(`An error occurred: ${error.response.data.error || 'Unknown error'}`);
+        } else {
+          alert('An error occurred while generating the PubMed query. Please try again later.');
+        }
       }
     } else {
       setStep(step + 1);
@@ -131,7 +138,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
   const handleSaveQuery = () => {
     const currentYear = new Date().getFullYear();
     const mockYearDistribution: Record<number, number> = {};
-    
+
     // Generate mock data for the last 10 years
     for (let year = currentYear - 9; year <= currentYear; year++) {
       mockYearDistribution[year] = Math.floor(Math.random() * 100);
@@ -196,6 +203,11 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
     setPubMedQuery(prevQuery => prevQuery + ' OR ' + synonym);
   };
 
+  const handleRetry = () => {
+    setRetryCount(retryCount + 1);
+    handleNextStep();
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -229,7 +241,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
               placeholder="Describe your research question..."
             />
             <p className="mt-2 text-sm text-gray-600 italic">
-              Example: Publications on the use of ocrelizumab in the treatment of multiple sclerosis
+              Example: Publications addressing the use of ocrelizumab in combination therapy for the treatment of multiple sclerosis
             </p>
             <button
               onClick={handleNextStep}
@@ -309,7 +321,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
                 />
               </div>
             </div>
-            
+
             <div className="mt-4 flex space-x-4">
               <button
                 onClick={handleCollectDocuments}
@@ -319,7 +331,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
                 {isCollecting ? 'Collecting...' : isCollected ? 'Collected' : 'Collect Documents'}
                 <FaDownload className="ml-2" />
               </button>
-              
+
               <button
                 onClick={handleSaveQuery}
                 className="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 flex items-center"
@@ -360,7 +372,7 @@ const QueryGenerator: React.FC<QueryGeneratorProps> = ({ initialData, onSaveQuer
         <FaSearch className="mr-2" /> Query Generator
       </h1>
       {renderStep()}
-      
+
       {savedQueries.length > 0 && (
         <div className="mt-8">
           <div className="flex justify-between items-center mb-4">

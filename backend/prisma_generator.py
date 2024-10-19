@@ -6,26 +6,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def generate_prisma_diagram():
+def generate_prisma_diagram(data):
     logger.debug("Starting PRISMA diagram generation")
     try:
-        # Simulated database connection and data retrieval
-        data = {
-            'identification': 3163,
-            'deduplication': {
-                'duplicates_removed': 3163 - 654,
-                'records_after_deduplication': 2333
-            },
-            'screening': {
-                'selected_for_screening': 2509,
-                'excluded': 2333
-            },
-            'eligibility': {
-                'full_text_assessed': 176,
-                'excluded': 35
-            },
-            'included': 141
-        }
+        # Use the provided data
+        identification = data['totalVolume']
+        duplicates_removed = data['duplicates']
+        records_after_deduplication = data['postDeduplication']
+        full_text_assessed = data['hundredPercentMatch']
+        excluded = records_after_deduplication - full_text_assessed
+        included = full_text_assessed  # Assuming all full-text assessed are included
 
         # Create the figure and axis
         fig, ax = plt.subplots(figsize=(12, 10))
@@ -40,14 +30,14 @@ def generate_prisma_diagram():
             ax.text(x + width/2, y + height/2, text, ha='center', va='center', wrap=True)
 
         # Add boxes
-        create_box(0.5, 5, 1.5, 0.5, f"Records identified\n(n = {data['identification']})")
-        create_box(0.5, 4, 1.5, 0.5, f"Records after deduplication\n(n = {data['deduplication']['records_after_deduplication']})")
-        create_box(0.5, 3, 1.5, 0.5, f"Records screened\n(n = {data['screening']['selected_for_screening']})")
-        create_box(0.5, 2, 1.5, 0.5, f"Full-text articles assessed\n(n = {data['eligibility']['full_text_assessed']})")
-        create_box(0.5, 1, 1.5, 0.5, f"Studies included\n(n = {data['included']})")
-        create_box(2.25, 4, 1, 0.5, f"Duplicates removed\n(n = {data['deduplication']['duplicates_removed']})")
-        create_box(2.25, 3, 1, 0.5, f"Records excluded\n(n = {data['screening']['excluded']})")
-        create_box(2.25, 2, 1, 0.5, f"Full-text articles excluded\n(n = {data['eligibility']['excluded']})")
+        create_box(0.5, 5, 1.5, 0.5, f"Records identified\n(n = {identification})")
+        create_box(0.5, 4, 1.5, 0.5, f"Records after deduplication\n(n = {identification})")
+        create_box(0.5, 3, 1.5, 0.5, f"Records screened\n(n = {records_after_deduplication})")
+        create_box(0.5, 2, 1.5, 0.5, f"Full-text articles assessed\n(n = {full_text_assessed})")
+        create_box(0.5, 1, 1.5, 0.5, f"Studies included\n(n = {included})")
+        create_box(2.25, 4, 1, 0.5, f"Duplicates removed\n(n = {duplicates_removed})")
+        create_box(2.25, 3, 1, 0.5, f"Records excluded\n(n = {excluded})")
+        create_box(2.25, 2, 1, 0.5, f"Full-text articles excluded\n(n = 0)")  # Assuming all full-text assessed are included
 
         # Add arrows
         ax.arrow(1.25, 5, 0, -0.4, head_width=0.05, head_length=0.1, fc='k', ec='k')
@@ -81,4 +71,13 @@ def generate_prisma_diagram():
         raise
 
 if __name__ == "__main__":
-    generate_prisma_diagram()
+    # Test data
+    test_data = {
+        'totalVolume': 1000,
+        'pubmedVolume': 600,
+        'semanticScholarVolume': 400,
+        'duplicates': 100,
+        'postDeduplication': 900,
+        'hundredPercentMatch': 150
+    }
+    generate_prisma_diagram(test_data)

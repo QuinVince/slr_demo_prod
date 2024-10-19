@@ -42,6 +42,14 @@ class SynonymRequest(BaseModel):
     answers: dict
     query: str
 
+class PrismaData(BaseModel):
+    totalVolume: int
+    pubmedVolume: int
+    semanticScholarVolume: int
+    duplicates: int
+    postDeduplication: int
+    hundredPercentMatch: int
+
 # Keep only the necessary endpoints (generate_questions, generate_pubmed_query, generate_synonyms, export_prisma)
 # Remove all project-related endpoints
 
@@ -53,16 +61,16 @@ async def generate_questions(request: Request):
         query = body.get('query')
         if not query:
             raise HTTPException(status_code=400, detail="Query is required")
-        
+
         # Check if MISTRAL_API_KEY is set
         if not os.getenv("MISTRAL_API_KEY"):
             raise HTTPException(status_code=500, detail="MISTRAL_API_KEY environment variable not set")
-        
+
         result = subprocess.run(['python', 'backend/generate_questions.py', query], capture_output=True, text=True)
         logger.info(f"generate_questions.py output: {result.stdout}")
         if result.stderr:
             logger.error(f"generate_questions.py error: {result.stderr}")
-        
+
         try:
             return json.loads(result.stdout)
         except json.JSONDecodeError:
@@ -75,8 +83,13 @@ async def generate_questions(request: Request):
 
 @app.post("/generate_pubmed_query")
 async def generate_pubmed_query(request: PubMedQueryRequest):
+    logger.info(f"Received PubMed query request: {request}")
     try:
+        logger.info("Running generate_pubmed_query.py")
         result = subprocess.run(['python', 'backend/generate_pubmed_query.py', request.query, json.dumps(request.answers)], capture_output=True, text=True)
+        logger.info(f"generate_pubmed_query.py output: {result.stdout}")
+        if result.stderr:
+            logger.warning(f"generate_pubmed_query.py stderr: {result.stderr}")
         return {"query": result.stdout.strip()}
     except Exception as e:
         logger.error(f"Error in generate_pubmed_query: {str(e)}")
@@ -91,7 +104,7 @@ async def generate_synonyms(request: SynonymRequest):
         if not os.path.exists(script_path):
             logger.error(f"Script not found at {script_path}")
             raise FileNotFoundError(f"The script {script_path} was not found.")
-        
+
         logger.info("Running generate_synonyms.py")
         result = subprocess.run(['python', script_path, 
                                  request.description, 
@@ -102,7 +115,7 @@ async def generate_synonyms(request: SynonymRequest):
         logger.info(f"generate_synonyms.py output: {result.stdout}")
         if result.stderr:
             logger.error(f"generate_synonyms.py error: {result.stderr}")
-        
+
         try:
             return json.loads(result.stdout)
         except json.JSONDecodeError:
@@ -117,12 +130,12 @@ async def test_synonyms():
     logger.debug("test_synonyms endpoint called")
     return {"message": "Synonym route is working"}
 
-@app.get("/export_prisma")
-async def export_prisma():
-    logger.debug("export_prisma endpoint called")
+@app.post("/export_prisma")
+async def export_prisma(data: PrismaData):
+    logger.debug("export_prisma endpoint called with data")
     try:
         logger.debug("Generating PRISMA diagram...")
-        image_path = generate_prisma_diagram()
+        image_path = generate_prisma_diagram(data.dict())
         logger.debug(f"PRISMA diagram generated successfully at {image_path}")
         if not os.path.exists(image_path):
             logger.error(f"Generated image file not found: {image_path}")
@@ -141,10 +154,11 @@ for route in app.routes:
     else:
         logger.debug(f"Mount: {route.path}")
 
-    # Mount the static directory
+# Mount the static directory
 frontend_dir = os.path.join(os.path.dirname(__file__), '..', 'server', 'build')
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
 logger.debug(f"Serving static files from {frontend_dir}")
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))

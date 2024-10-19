@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaSearch, FaExchangeAlt, FaFileAlt, FaTimes, FaToggleOn, FaToggleOff, FaChevronDown, FaTrash } from 'react-icons/fa';
 import { SavedQuery } from '../App';
 import { mockDuplicatePairs } from '../mockData';
+import { generateAnalysisData } from '../utils/generateAnalysisData';
 
 interface DuplicateAnalysisProps {
   savedQueries: SavedQuery[];
@@ -62,7 +63,8 @@ const DuplicateAnalysis: React.FC<DuplicateAnalysisProps> = ({ savedQueries }) =
 
   useEffect(() => {
     if (selectedQuery) {
-      setDuplicatePairs(mockDuplicatePairs);
+      const analysisData = generateAnalysisData(selectedQuery);
+      setDuplicatePairs(mockDuplicatePairs.slice(0, analysisData.duplicates));
       setRemovedDuplicates(0);
       setSelectedPairs(new Set());
     }
@@ -155,7 +157,7 @@ const DuplicateAnalysis: React.FC<DuplicateAnalysisProps> = ({ savedQueries }) =
             </div>
             <div className="bg-yellow-100 p-4 rounded-lg">
               <p className="text-sm text-yellow-700">Potential Duplicates</p>
-              <p className="text-2xl font-bold text-yellow-800">{duplicatePairs.length}</p>
+              <p className="text-2xl font-bold text-yellow-800">{generateAnalysisData(selectedQuery).duplicates}</p>
             </div>
             <div className="bg-green-100 p-4 rounded-lg">
               <p className="text-sm text-green-700">Duplicates Removed</p>
