@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaExchangeAlt, FaFileAlt, FaTimes, FaToggleOn, FaToggleOff, FaChevronDown, FaTrash } from 'react-icons/fa';
+import {FaExchangeAlt, FaFileAlt, FaTimes, FaToggleOn, FaToggleOff, FaChevronDown, FaTrash } from 'react-icons/fa';
 import { SavedQuery } from '../App';
 import { mockDuplicatePairs } from '../mockData';
 import { generateAnalysisData } from '../utils/generateAnalysisData';
