@@ -33,7 +33,7 @@ export interface AnalysisData {
     authors: string[]; // Add this line
     selected: boolean;
     abstractExpanded: boolean;
-    studyType: 'rct' | 'observational' | 'meta-analysis' | 'other';
+     studyType: 'Meta-analysis' | 'Systematic Review' | 'RCT' | 'Cohort study' | 'Case-control study' | 'Case report' | 'Case series' | 'Expert opinion' | 'Narrative review' | 'Animal study' | 'In vitro study';
     pico: {
       population: string;
       intervention: string;
@@ -41,6 +41,7 @@ export interface AnalysisData {
       outcome: string;
       expanded: boolean;
     };
+    pubmedLink: string;
   }>;
   criteria: Array<{
     id: number;
@@ -94,10 +95,10 @@ const App: React.FC = () => {
           <div className="flex items-center">
             <FaHeartbeat className="text-white text-3xl mr-4" />
             <h1 className="text-2xl font-semibold text-white">Systematic Literature Review Assistant</h1>
-          </div
-          <img src={logo} alt="Logo" className="h-12 w-auto" /> {/* Add this line */}
-        </div>
-      </header>  
+            </div>
+            <img src={logo} alt="Logo" className="h-12 w-auto" />
+            </div>
+      </header> 
       <main className="container mx-auto px-4 py-8">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="border-b border-gray-200">
