@@ -352,8 +352,8 @@ const DocumentAnalysis: React.FC<DocumentAnalysisProps> = ({ analysisData, updat
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="">Criteria examples</option>
-              <option value="Select only RCTs, SLRs, meta-analysis">Select only RCTs, SLRs, meta-analysis</option>
-              <option value="Select papers that consider the use of Ocrelizumab to treat multiple sclerosis">Select papers that consider the use of Ocrelizumab to treat multiple sclerosis</option>
+              <option value="Select documents that includes a detailed analysis on PPMS and RRMS">Select only RCTs, SLRs, meta-analysis</option>
+              <option value="Select papers where Ocrelizumab is effectively used as combination therapy for the treatment of multiple sclerosis">Select papers that consider the use of Ocrelizumab to treat multiple sclerosis</option>
             </select>
           </div>
         </div>
